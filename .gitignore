@@ -1,0 +1,6 @@
+test/config.yml
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
+.DS_STORE
