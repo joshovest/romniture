@@ -86,15 +86,20 @@ module ROmniture
       request.url = @environment + "?method=#{method}"
       request.headers = request_headers
       request.body = data.to_json
-
-      response = HTTPI.post(request)
       
-      if response.code >= 400
-        log(:error, "Request failed and returned with response code: #{response.code}\n\n#{response.body}")
-        raise "Request failed and returned with response code: #{response.code}\n\n#{response.body}"
-      end
+      begin
+        response = HTTPI.post(request)
+        
+        if response.code >= 400
+          log(:error, "Request failed and returned with response code: #{response.code}\n\n#{response.body}")
+          raise "Request failed and returned with response code: #{response.code}\n\n#{response.body}"
+        end
       
-      log(Logger::INFO, "Server responded with response code #{response.code}.")
+        log(Logger::INFO, "Server responded with response code #{response.code}.")
+      
+      rescue Timeout::Error
+	    log(Logger::INFO, "Request timed out.")
+	  end
       
       response
     end
