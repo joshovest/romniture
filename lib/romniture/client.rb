@@ -78,6 +78,8 @@ module ROmniture
       log(Logger::INFO, "Created new nonce: #{@password}")
       
       request = HTTPI::Request.new
+      request.open_timeout = 100
+      request.read_timeout = 100
 
       if @verify_mode
         request.auth.ssl.verify_mode = @verify_mode
@@ -87,19 +89,14 @@ module ROmniture
       request.headers = request_headers
       request.body = data.to_json
       
-      begin
-        response = HTTPI.post(request)
-        
-        if response.code >= 400
-          log(:error, "Request failed and returned with response code: #{response.code}\n\n#{response.body}")
-          raise "Request failed and returned with response code: #{response.code}\n\n#{response.body}"
-        end
+      response = HTTPI.post(request)
       
-        log(Logger::INFO, "Server responded with response code #{response.code}.")
+      if response.code >= 400
+        log(:error, "Request failed and returned with response code: #{response.code}\n\n#{response.body}")
+        raise "Request failed and returned with response code: #{response.code}\n\n#{response.body}"
+      end
       
-      rescue Timeout::Error
-	    log(Logger::INFO, "Request timed out.")
-	  end
+      log(Logger::INFO, "Server responded with response code #{response.code}.")
       
       response
     end
